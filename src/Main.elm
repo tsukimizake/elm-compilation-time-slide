@@ -139,10 +139,10 @@ renderDocument document =
             Pic height path ->
                 case height of
                     Nothing ->
-                        img [ src <| "../assets/" ++ path ] []
+                        img [ src <| "assets/" ++ path ] []
 
                     Just h ->
-                        img [ css [ maxHeight (px h) ], src <| "../assets/" ++ path ] []
+                        img [ css [ maxHeight (px h) ], src <| "assets/" ++ path ] []
         ]
 
 

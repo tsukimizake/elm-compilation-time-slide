@@ -1,4 +1,4 @@
-// elm-watch hot {"version":"1.1.0","targetName":"My target name","webSocketPort":52169}
+// elm-watch hot {"version":"1.1.0","targetName":"My target name","webSocketPort":57127}
 "use strict";
 (() => {
   // node_modules/tiny-decoders/index.mjs
@@ -604,11 +604,11 @@ ${variant}`;
   var VERSION = "1.1.0";
   var TARGET_NAME = "My target name";
   var INITIAL_ELM_COMPILED_TIMESTAMP = Number(
-    "1667455035405"
+    "1667473979807"
   );
   var ORIGINAL_COMPILATION_MODE = "standard";
   var ORIGINAL_BROWSER_UI_POSITION = "BottomLeft";
-  var WEBSOCKET_PORT = "52169";
+  var WEBSOCKET_PORT = "57127";
   var CONTAINER_ID = "elm-watch";
   var DEBUG = String("false") === "true";
   var BROWSER_UI_MOVED_EVENT = "BROWSER_UI_MOVED_EVENT";
@@ -11535,7 +11535,7 @@ var $author$project$Main$renderDocument = function (document) {
 								$rtfeldman$elm_css$Html$Styled$img,
 								_List_fromArray(
 									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$src('../assets/' + path)
+										$rtfeldman$elm_css$Html$Styled$Attributes$src('assets/' + path)
 									]),
 								_List_Nil);
 						} else {
@@ -11550,7 +11550,7 @@ var $author$project$Main$renderDocument = function (document) {
 												$rtfeldman$elm_css$Css$maxHeight(
 												$rtfeldman$elm_css$Css$px(h))
 											])),
-										$rtfeldman$elm_css$Html$Styled$Attributes$src('../assets/' + path)
+										$rtfeldman$elm_css$Html$Styled$Attributes$src('assets/' + path)
 									]),
 								_List_Nil);
 						}
