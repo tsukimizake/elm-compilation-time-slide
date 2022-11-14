@@ -1,5 +1,6 @@
 # elm-compile-time-slide
 https://tsukimizake.github.io/elm-compilation-time-slide/
 
-- TODO 記事の完成
-- TODO elm-watchで吐いたjsをそのまま使うとwebsocket接続できないとoverlayがかかるらしいので別jsを参照する
+- TODO デザインどうにかする
+- TODO codeを等幅フォントに？
+- TODO elmiの例示をして理由の深掘り
