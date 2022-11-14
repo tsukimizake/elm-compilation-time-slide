@@ -604,7 +604,7 @@ ${variant}`;
   var VERSION = "1.1.0";
   var TARGET_NAME = "My target name";
   var INITIAL_ELM_COMPILED_TIMESTAMP = Number(
-    "1668430193696"
+    "1668431158009"
   );
   var ORIGINAL_COMPILATION_MODE = "standard";
   var ORIGINAL_BROWSER_UI_POSITION = "BottomLeft";
@@ -9291,7 +9291,7 @@ var $author$project$Main$pages = _List_fromArray(
 		{
 			document: _List_fromArray(
 				[
-					$author$project$Main$Text('レコードのネストの深さが増えるとコンパイル時間がO(2^n)で増える'),
+					$author$project$Main$Text('一言で言うとレコードのネストの深さが増えるとコンパイル時間が倍々O(2^n)で増える'),
 					$author$project$Main$Text('issueはextensible recordについて書いているが、同じことが通常のレコードでも起きる'),
 					$author$project$Main$Text('例えばこういうのが(もっとネストが深いと)遅い'),
 					$author$project$Main$Code('record =\n    { k = { j = { i = { h = { g = { f = { e = { d = { c = { b = { a = "" } } } } } } } } } } }\n'),
@@ -9331,7 +9331,18 @@ var $author$project$Main$pages = _List_fromArray(
 			title: $elm$core$Maybe$Just('結果: 修正後のコンパイル時間')
 		}),
 		$author$project$Main$TitleOnly(
-		{title: 'TODO: 原因の深掘り'}),
+		{title: '原因の深掘り'}),
+		$author$project$Main$Article(
+		{
+			document: _List_fromArray(
+				[
+					$author$project$Main$Text('elm-js会(Elmコンパイラが生成するJSコードの悪口を言う会)に持って行って調査したところ、このissueの原因はtypecheck結果が膨れていることだった'),
+					$author$project$Main$Code('record =\n    { k = { j = { i = { h = { g = { f = { e = { d = { c = { b = { a = "" } } } } } } } } } } }\n'),
+					$author$project$Main$Text('上のコードをコンパイルした際の.elmiファイルを見ると'),
+					$author$project$Main$Code('')
+				]),
+			title: $elm$core$Maybe$Just('原因の深掘り')
+		}),
 		$author$project$Main$TitleOnly(
 		{title: 'まとめ: コンパイル時間を伸ばさないコツ'}),
 		$author$project$Main$Article(

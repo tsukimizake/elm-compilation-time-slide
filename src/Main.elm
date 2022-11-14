@@ -202,7 +202,7 @@ pages =
     , Article
         { title = Just "https://github.com/elm/compiler/issues/1897 の要約"
         , document =
-            [ Text "レコードのネストの深さが増えるとコンパイル時間がO(2^n)で増える"
+            [ Text "一言で言うとレコードのネストの深さが増えるとコンパイル時間が倍々O(2^n)で増える"
             , Text "issueはextensible recordについて書いているが、同じことが通常のレコードでも起きる"
             , Text "例えばこういうのが(もっとネストが深いと)遅い"
             , Code """record =
@@ -292,7 +292,18 @@ view = ...
 
     -- TODO 終わらんかったら最悪ここ消す なんなら今でも時間は丁度くらいのはず
     -- TODO elmiの例示
-    , TitleOnly { title = "TODO: 原因の深掘り" }
+    , TitleOnly { title = "原因の深掘り" }
+    , Article
+        { title = Just "原因の深掘り"
+        , document =
+            [ Text "elm-js会(Elmコンパイラが生成するJSコードの悪口を言う会)に持って行って調査したところ、このissueの原因はtypecheck結果が膨れていることだった"
+            , Code """record =
+    { k = { j = { i = { h = { g = { f = { e = { d = { c = { b = { a = "" } } } } } } } } } } }
+"""
+            , Text "上のコードをコンパイルした際の.elmiファイルを見ると"
+            , Code ""
+            ]
+        }
     , TitleOnly { title = "まとめ: コンパイル時間を伸ばさないコツ" }
     , Article
         { title = Just "まとめ: コンパイル時間を伸ばさないコツ"
@@ -306,14 +317,3 @@ view = ...
             ]
         }
     ]
-
-
-
--- TODO サブ知見 Tipsとしてまとめて書くか
--- elmi消せる
--- レコードを新に作るとその内側の型推論結果が倍に膨れてしまう
---  プロジェクトのルートに近い部分などで多重にネストしたレコードを増やすとその内側が倍になる
---  末端部なら影響は無視できる
--- モジュール分けてもメモリプレッシャーは改善しない
--- メモリ使用量の設定
--- elm-compilerのデバッグビルド
