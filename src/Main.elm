@@ -186,8 +186,9 @@ pages =
   GC      time   27.812s  ( 29.767s elapsed)
   EXIT    time    0.000s  (  0.002s elapsed)
   Total   time   30.834s  ( 32.147s elapsed)
-    """
+    """ -- TODO codeに等幅フォント
             , Text "50000行のフルビルドだと60sec程度"
+            , Text "1500行で30秒かかるのはかなり遅い"
             , Text "遅いだけならまだしも、メモリ不足でCIが頻繁に落ちるようになったため調査に乗り出すことに"
 
             -- 調査過程はめんどいので省略
@@ -200,23 +201,106 @@ pages =
             [ Text "レコードのネストの深さが増えるとコンパイル時間がO(2^n)で増える"
             , Text "issueはextensible recordについて書いているが、同じことが通常のレコードでも起きる"
             , Text "プロジェクトが大規模化するに従ってネストが増えていき、これが発生していた"
-            , Text "SPAのページモジュールからexportするinit, update, viewなどをわかりやすさのためにレコードに格納していたのをやめたところ半分程度に改善した"
+            , Text "ページごとのinit, update, viewなどをレコードにまとめていたのをやめることで改善"
+            ]
+        }
+    , Article
+        { title = Just "修正箇所(修正前)"
+        , document =
+            [ Code """module Page1 exposing(page)
 
-            -- TODO もうちょっと細かく説明したいところだがコード出したりしているとあっという間に10分超えそう
+page =
+  { init = ...
+  , update = ...
+  , view = ...
+  }
+            """
+            , Code """module Main exposing(..)
+
+type Model
+  = Model1 Page1.Model
+  | Model2 Page2.Model
+
+type Msg
+  = Msg1 Page1.Msg
+  | Msg2 Page1.Msg
+
+init = ...
+update msg mPrev =
+  case (msg, mPrev) of
+    (Msg1 page1msg, Model1 page1model) ->
+      Page1.page.update page1msg page1model
+    ...
+view = ...
+"""
+            ]
+        }
+    , Article
+        { title = Just "修正箇所(修正後)"
+        , document =
+            [ Code """module Page1 exposing(init, update, view)
+
+init = ...
+update = ...
+view = ...
+
+            """
+            , Code """type Model
+  = Page1 Page1.Model
+  | Page2 Page2.Model
+
+type Msg =
+     Msg1 Page1.Msg
+   | Msg2 Page1.Msg
+
+init = ...
+update msg mPrev =
+  case (msg, mPrev) of
+    (Msg1 page1msg, Model1 page1model) ->
+      Page1.update page1msg page1model
+    ...
+view = ...
+"""
             ]
         }
 
     -- 以降TODO
-    , TitleOnly { title = "修正後コンパイル時間" }
-    , TitleOnly { title = "haskellソースコード深掘り" }
-    , TitleOnly { title = "まとめとTips" }
-    , TitleOnly { title = "謝辞" }
+    , Article
+        { title = Just "修正後のコンパイル時間"
+        , document =
+            [ Text "前記の修正でメモリ消費、コンパイル時間共に半分程度になった"
+            , Text "加えて、コンパイル中のGC間隔等の設定を(別の人が)やってコンパイル時間はさらに縮んだ"
+            , Text "最終的に、問題のファイルのみのコンパイルは30s -> 11s程度に縮んだ"
+            , Text "フルビルドは90s -> 30s程度に"
+
+            -- TODO さみしいので測定結果
+            ]
+        }
+
+    -- TODO 終わらんかったら最悪ここ消す なんなら今でも時間は丁度くらいのはず
+    -- TODO elmiの例示
+    , TitleOnly { title = "原因の深掘り" }
+    , TitleOnly { title = "まとめ: コンパイル時間を伸ばさないコツ" }
+    , Article
+        { title = Just "まとめ: コンパイル時間を伸ばさないコツ"
+        , document =
+            [ Text "レコードのネストを増やさない"
+            , Text "特にプロジェクトのルートに近い部分で大量のレコードを含むレコードを増やすと大きな影響が出る"
+            , Text "末端ならレコードを増やしても影響はほぼない"
+            , Text ""
+            , Text "余談: モジュールを分けてもメモリプレッシャーは改善しない"
+            , Text "これはコンパイルのフェイズが 全モジュールパース -> 全モジュール型推論 -> 全モジュールコード生成 のように動いているため"
+            ]
+        }
     ]
 
 
 
 -- TODO サブ知見 Tipsとしてまとめて書くか
 -- elmi消せる
+-- レコードを新に作るとその内側の型推論結果が倍に膨れてしまう
+--  プロジェクトのルートに近い部分などで多重にネストしたレコードを増やすとその内側が倍になる
+--  末端部なら影響は無視できる
 -- モジュール分けてもメモリプレッシャーは改善しない
 -- メモリ使用量の設定
 -- elm-compilerのデバッグビルド
