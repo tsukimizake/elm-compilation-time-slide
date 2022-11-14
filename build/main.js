@@ -6176,7 +6176,7 @@ var $author$project$Main$pages = _List_fromArray(
 				[
 					$author$project$Main$Text('弊社のSPAアプリ(50000行程度)のうち、各ページの結線を担当している1ファイル(1500行程度)だけtouchしたものの7月時点のコンパイル時間'),
 					$author$project$Main$Code('\n  INIT    time    0.003s  (  0.008s elapsed)\n  MUT     time    3.018s  (  2.370s elapsed)\n  GC      time   27.812s  ( 29.767s elapsed)\n  EXIT    time    0.000s  (  0.002s elapsed)\n  Total   time   30.834s  ( 32.147s elapsed)\n    '),
-					$author$project$Main$Text('50000行のフルビルドだと60sec程度'),
+					$author$project$Main$Text('50000行のフルビルドだと60秒程度'),
 					$author$project$Main$Text('1500行で30秒かかるのはかなり遅い'),
 					$author$project$Main$Text('遅いだけならまだしも、メモリ不足でCIが頻繁に落ちるようになったため調査に乗り出すことに')
 				]),
@@ -6190,6 +6190,8 @@ var $author$project$Main$pages = _List_fromArray(
 				[
 					$author$project$Main$Text('レコードのネストの深さが増えるとコンパイル時間がO(2^n)で増える'),
 					$author$project$Main$Text('issueはextensible recordについて書いているが、同じことが通常のレコードでも起きる'),
+					$author$project$Main$Text('例えばこういうのが(もっとネストが深いと)遅い'),
+					$author$project$Main$Code('record =\n    { k = { j = { i = { h = { g = { f = { e = { d = { c = { b = { a = "" } } } } } } } } } } }\n'),
 					$author$project$Main$Text('プロジェクトが大規模化するに従ってネストが増えていき、これが発生していた'),
 					$author$project$Main$Text('ページごとのinit, update, viewなどをレコードにまとめていたのをやめることで改善')
 				]),
@@ -6225,7 +6227,7 @@ var $author$project$Main$pages = _List_fromArray(
 			title: $elm$core$Maybe$Just('結果: 修正後のコンパイル時間')
 		}),
 		$author$project$Main$TitleOnly(
-		{title: '原因の深掘り'}),
+		{title: 'TODO: 原因の深掘り'}),
 		$author$project$Main$TitleOnly(
 		{title: 'まとめ: コンパイル時間を伸ばさないコツ'}),
 		$author$project$Main$Article(
@@ -6235,7 +6237,7 @@ var $author$project$Main$pages = _List_fromArray(
 					$author$project$Main$Text('レコードのネストを増やさない'),
 					$author$project$Main$Text('特にプロジェクトのルートに近い部分で大量のレコードを含むレコードを増やすと大きな影響が出る'),
 					$author$project$Main$Text('末端ならレコードを増やしても影響はほぼない'),
-					$author$project$Main$Text(''),
+					$author$project$Main$Text('\n'),
 					$author$project$Main$Text('余談: モジュールを分けてもメモリプレッシャーは改善しない'),
 					$author$project$Main$Text('これはコンパイルのフェイズが 全モジュールパース -> 全モジュール型推論 -> 全モジュールコード生成 のように動いているため')
 				]),

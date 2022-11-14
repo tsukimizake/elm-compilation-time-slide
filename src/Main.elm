@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Css exposing (..)
-import Html.Styled exposing (Html, button, div, h1, h2, img, text)
+import Html.Styled exposing (Html, br, button, div, h1, h2, img, text)
 import Html.Styled.Attributes exposing (css, src)
 import Html.Styled.Events exposing (onClick)
 import List.Extra
@@ -23,6 +23,7 @@ type Document
     = Text String
     | Code String
     | Pic (Maybe Float) String
+    | Divide
 
 
 type alias Model =
@@ -143,6 +144,9 @@ renderDocument document =
 
                     Just h ->
                         img [ css [ maxHeight (px h) ], src <| "assets/" ++ path ] []
+
+            Divide ->
+                div [ css [ height (px 20) ] ] []
         ]
 
 
@@ -187,7 +191,7 @@ pages =
   EXIT    time    0.000s  (  0.002s elapsed)
   Total   time   30.834s  ( 32.147s elapsed)
     """ -- TODO codeに等幅フォント
-            , Text "50000行のフルビルドだと60sec程度"
+            , Text "50000行のフルビルドだと60秒程度"
             , Text "1500行で30秒かかるのはかなり遅い"
             , Text "遅いだけならまだしも、メモリ不足でCIが頻繁に落ちるようになったため調査に乗り出すことに"
 
@@ -200,6 +204,10 @@ pages =
         , document =
             [ Text "レコードのネストの深さが増えるとコンパイル時間がO(2^n)で増える"
             , Text "issueはextensible recordについて書いているが、同じことが通常のレコードでも起きる"
+            , Text "例えばこういうのが(もっとネストが深いと)遅い"
+            , Code """record =
+    { k = { j = { i = { h = { g = { f = { e = { d = { c = { b = { a = "" } } } } } } } } } } }
+"""
             , Text "プロジェクトが大規模化するに従ってネストが増えていき、これが発生していた"
             , Text "ページごとのinit, update, viewなどをレコードにまとめていたのをやめることで改善"
             ]
@@ -271,15 +279,20 @@ view = ...
             [ Text "前記の修正でメモリ消費、コンパイル時間共に半分程度になった"
             , Text "加えて、コンパイル中のGC間隔等の設定を(別の人が)やってコンパイル時間はさらに縮んだ"
             , Text "最終的に、問題のファイルのみのコンパイルは30s -> 11s程度に縮んだ"
-            , Text "フルビルドは90s -> 30s程度に"
-
-            -- TODO さみしいので測定結果
+            , Code """
+  INIT    time    0.007s  (  0.018s elapsed)
+  MUT     time    5.426s  (  2.658s elapsed)
+  GC      time    5.405s  (  7.322s elapsed)
+  EXIT    time    0.001s  (  0.001s elapsed)
+  Total   time   10.839s  (  9.999s elapsed)
+            """
+            , Text "また、フルビルドは90s -> 30s程度に"
             ]
         }
 
     -- TODO 終わらんかったら最悪ここ消す なんなら今でも時間は丁度くらいのはず
     -- TODO elmiの例示
-    , TitleOnly { title = "原因の深掘り" }
+    , TitleOnly { title = "TODO: 原因の深掘り" }
     , TitleOnly { title = "まとめ: コンパイル時間を伸ばさないコツ" }
     , Article
         { title = Just "まとめ: コンパイル時間を伸ばさないコツ"
@@ -287,7 +300,7 @@ view = ...
             [ Text "レコードのネストを増やさない"
             , Text "特にプロジェクトのルートに近い部分で大量のレコードを含むレコードを増やすと大きな影響が出る"
             , Text "末端ならレコードを増やしても影響はほぼない"
-            , Text ""
+            , Divide
             , Text "余談: モジュールを分けてもメモリプレッシャーは改善しない"
             , Text "これはコンパイルのフェイズが 全モジュールパース -> 全モジュール型推論 -> 全モジュールコード生成 のように動いているため"
             ]
