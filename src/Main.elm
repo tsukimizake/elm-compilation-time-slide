@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Css exposing (..)
-import Html.Styled exposing (Html, br, button, div, h1, h2, img, text)
+import Html.Styled exposing (Html, button, div, h1, h2, img, text)
 import Html.Styled.Attributes exposing (css, src)
 import Html.Styled.Events exposing (onClick)
 import List.Extra
@@ -177,7 +177,8 @@ main =
 
 pages : List Page
 pages =
-    [ TitleOnly { title = "大規模なelmプロジェクトのコンパイル時間の話" }
+    [ -- 前置き
+      TitleOnly { title = "大規模なelmプロジェクトのコンパイル時間の話" }
     , TitleOnly { title = "前提: elmのコンパイル速いですよね" }
     , Article { title = Just "elmのコンパイル速いですよね", document = [ Text "このelm製スライド(300行程度)のコンパイル時間", Pic (Just 200) "slide-compile-time.png" ] }
     , Article
@@ -194,26 +195,38 @@ pages =
             , Text "50000行のフルビルドだと60秒程度"
             , Text "1500行で30秒かかるのはかなり遅い"
             , Text "遅いだけならまだしも、メモリ不足でCIが頻繁に落ちるようになったため調査に乗り出すことに"
-
-            -- 調査過程はめんどいので省略
             ]
         }
-    , TitleOnly { title = "原因: https://github.com/elm/compiler/issues/1897" }
+
+    -- プロファイル
+    , TitleOnly { title = "何をおいてもプロファイル" }
     , Article
-        { title = Just "https://github.com/elm/compiler/issues/1897 の要約"
+        { title = Just "プロファイル"
         , document =
-            [ Text "一言で言うとレコードのネストの深さが増えるとコンパイル時間が倍々O(2^n)で増える"
-            , Text "issueはextensible recordについて書いているが、同じことが通常のレコードでも起きる"
-            , Text "例えばこういうのが(もっとネストが深いと)遅い"
-            , Code """record =
-    { k = { j = { i = { h = { g = { f = { e = { d = { c = { b = { a = "" } } } } } } } } } } }
-"""
-            , Text "プロジェクトが大規模化するに従ってネストが増えていき、これが発生していた"
+            [ Text "elm-compilerをプロファイルモードで再ビルドして、これを使ってプロジェクトをコンパイルすると、コンパイル時間の何割が型チェックに使われているかなどが大まかにわかる"
+            , Text "cf. haskell/cabal#5930 https://nikita-volkov.github.io/profiling-cabal-projects/ http://www.kotha.net/ghcguide_ja/7.6.2/profiling.html"
+            , Divide
+            , Text "結果は以下"
+            , Text "TODO プロファイル結果 データ残ってるといいな"
+            ]
+        }
+
+    -- 原因
+    , TitleOnly { title = "原因: https://github.com/elm/compiler/issues/1897 (に近いことが起きていた)" }
+    , Article
+        { title = Just "原因: https://github.com/elm/compiler/issues/1897 (に近いことが起きていた)"
+        , document =
+            [ Text "elm-js会(Elmコンパイラが生成するJSの悪口を言う会)で調査したところ、各ページを格納したレコードの型推論後の型が巨大になってしまっていたことが原因だった"
+            , Text "extensible-recordは特にバグがあるらしく型が太ってしまう。中身の型と新しいextensible-recordの型が別に作られている？と思われる(ちゃんと調べ切れておらず理由は曖昧)"
+            , Divide
+            , Text "本プロジェクトでは他の要因も合わさって巨大に"
             , Text "ページごとのinit, update, viewなどをレコードにまとめていたのをやめることで改善"
             ]
         }
+
+    -- 修正前後のコード
     , Article
-        { title = Just "修正箇所(修正前)"
+        { title = Just "修正箇所(修正前)" -- TODO PageModule型は重要なので書く
         , document =
             [ Code """module Page1 exposing(page)
 
@@ -271,8 +284,6 @@ view = ...
 """
             ]
         }
-
-    -- 以降TODO
     , Article
         { title = Just "結果: 修正後のコンパイル時間"
         , document =
@@ -286,33 +297,29 @@ view = ...
   EXIT    time    0.001s  (  0.001s elapsed)
   Total   time   10.839s  (  9.999s elapsed)
             """
-            , Text "また、フルビルドは90s -> 30s程度に"
+            , Text "また、フルビルドは60s -> 30s程度に"
             ]
         }
 
-    -- TODO 終わらんかったら最悪ここ消す なんなら今でも時間は丁度くらいのはず
-    -- TODO elmiの例示
-    , TitleOnly { title = "原因の深掘り" }
+    -- まとめ
+    , TitleOnly { title = "まとめ: 現状わかっているコンパイル時間を伸ばさないコツ" }
     , Article
-        { title = Just "原因の深掘り"
+        { title = Just "まとめ: 現状わかっているコンパイル時間を伸ばさないコツ"
         , document =
-            [ Text "elm-js会(Elmコンパイラが生成するJSコードの悪口を言う会)に持って行って調査したところ、このissueの原因はtypecheck結果が膨れていることだった"
-            , Code """record =
-    { k = { j = { i = { h = { g = { f = { e = { d = { c = { b = { a = "" } } } } } } } } } } }
-"""
-            , Text "上のコードをコンパイルした際の.elmiファイルを見ると"
-            , Code ""
-            ]
-        }
-    , TitleOnly { title = "まとめ: コンパイル時間を伸ばさないコツ" }
-    , Article
-        { title = Just "まとめ: コンパイル時間を伸ばさないコツ"
-        , document =
-            [ Text "レコードのネストを増やさない"
-            , Text "特にプロジェクトのルートに近い部分で大量のレコードを含むレコードを増やすと大きな影響が出る"
-            , Text "末端ならレコードを増やしても影響はほぼない"
+            [ Text "型推論の結果が大きくなるようなものをなるべく作らない"
+            , Text "全ページのMsgをまとめた親Msgとかを持ち回るのは良くない"
             , Divide
-            , Text "余談: モジュールを分けてもメモリプレッシャーは改善しない"
+            , Text "レコードは特にまずい、のかもしれないそうでもないかもしれない"
+            , Text "例えば下のような単純なレコードなら1000重くらいにしても一瞬でコンパイルできる。巨大なHtml等を入れたデータ量が多いだけのレコードも同様"
+            , Code """record = { k = { j = { i = { h = { g = { f = { e = { d = { c = { b = { a = "" } } } } } } } } } } } """
+            , Divide
+            , Text "Extensible recordはまずいのでコンパイル時間を見ながら節度を持って"
+            , Text "issueのコードを試したところ21重でクラッシュした"
+            , Divide
+            , Text "型引数を取るレコードは型推論の結果が大きくなる場合まずいと思われる"
+            , Text "本プロジェクトのPageModuleからextensible-record部分のみ消す、outerMsgだけ消すなどした場合も少しずつ改善するが、recordごと消した場合には及ばなかった"
+            , Divide
+            , Text "余談: モジュールを分けてもフルビルド時のメモリプレッシャーは改善しない"
             , Text "これはコンパイルのフェイズが 全モジュールパース -> 全モジュール型推論 -> 全モジュールコード生成 のように動いているため"
             ]
         }

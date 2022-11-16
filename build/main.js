@@ -6184,19 +6184,32 @@ var $author$project$Main$pages = _List_fromArray(
 			title: $elm$core$Maybe$Just('elmのコンパイル速いですよね(？)')
 		}),
 		$author$project$Main$TitleOnly(
-		{title: '原因: https://github.com/elm/compiler/issues/1897'}),
+		{title: '何をおいてもプロファイル'}),
 		$author$project$Main$Article(
 		{
 			document: _List_fromArray(
 				[
-					$author$project$Main$Text('一言で言うとレコードのネストの深さが増えるとコンパイル時間が倍々O(2^n)で増える'),
-					$author$project$Main$Text('issueはextensible recordについて書いているが、同じことが通常のレコードでも起きる'),
-					$author$project$Main$Text('例えばこういうのが(もっとネストが深いと)遅い'),
-					$author$project$Main$Code('record =\n    { k = { j = { i = { h = { g = { f = { e = { d = { c = { b = { a = "" } } } } } } } } } } }\n'),
-					$author$project$Main$Text('プロジェクトが大規模化するに従ってネストが増えていき、これが発生していた'),
+					$author$project$Main$Text('elm-compilerをプロファイルモードで再ビルドして、これを使ってプロジェクトをコンパイルすると、コンパイル時間の何割が型チェックに使われているかなどが大まかにわかる'),
+					$author$project$Main$Text('cf. haskell/cabal#5930 https://nikita-volkov.github.io/profiling-cabal-projects/ http://www.kotha.net/ghcguide_ja/7.6.2/profiling.html'),
+					$author$project$Main$Divide,
+					$author$project$Main$Text('結果は以下'),
+					$author$project$Main$Text('TODO プロファイル結果 データ残ってるといいな')
+				]),
+			title: $elm$core$Maybe$Just('プロファイル')
+		}),
+		$author$project$Main$TitleOnly(
+		{title: '原因: https://github.com/elm/compiler/issues/1897 (に近いことが起きていた)'}),
+		$author$project$Main$Article(
+		{
+			document: _List_fromArray(
+				[
+					$author$project$Main$Text('elm-js会(Elmコンパイラが生成するJSの悪口を言う会)で調査したところ、各ページを格納したレコードの型推論後の型が巨大になってしまっていたことが原因だった'),
+					$author$project$Main$Text('extensible-recordは特にバグがあるらしく型が太ってしまう。中身の型と新しいextensible-recordの型が別に作られている？と思われる(ちゃんと調べ切れておらず理由は曖昧)'),
+					$author$project$Main$Divide,
+					$author$project$Main$Text('本プロジェクトでは他の要因も合わさって巨大に'),
 					$author$project$Main$Text('ページごとのinit, update, viewなどをレコードにまとめていたのをやめることで改善')
 				]),
-			title: $elm$core$Maybe$Just('https://github.com/elm/compiler/issues/1897 の要約')
+			title: $elm$core$Maybe$Just('原因: https://github.com/elm/compiler/issues/1897 (に近いことが起きていた)')
 		}),
 		$author$project$Main$Article(
 		{
@@ -6224,37 +6237,33 @@ var $author$project$Main$pages = _List_fromArray(
 					$author$project$Main$Text('加えて、コンパイル中のGC間隔等の設定を(別の人が)やってコンパイル時間はさらに縮んだ'),
 					$author$project$Main$Text('最終的に、問題のファイルのみのコンパイルは30s -> 11s程度に縮んだ'),
 					$author$project$Main$Code('\n  INIT    time    0.007s  (  0.018s elapsed)\n  MUT     time    5.426s  (  2.658s elapsed)\n  GC      time    5.405s  (  7.322s elapsed)\n  EXIT    time    0.001s  (  0.001s elapsed)\n  Total   time   10.839s  (  9.999s elapsed)\n            '),
-					$author$project$Main$Text('また、フルビルドは90s -> 30s程度に')
+					$author$project$Main$Text('また、フルビルドは60s -> 30s程度に')
 				]),
 			title: $elm$core$Maybe$Just('結果: 修正後のコンパイル時間')
 		}),
 		$author$project$Main$TitleOnly(
-		{title: '原因の深掘り'}),
+		{title: 'まとめ: 現状わかっているコンパイル時間を伸ばさないコツ'}),
 		$author$project$Main$Article(
 		{
 			document: _List_fromArray(
 				[
-					$author$project$Main$Text('elm-js会(Elmコンパイラが生成するJSコードの悪口を言う会)に持って行って調査したところ、このissueの原因はtypecheck結果が膨れていることだった'),
-					$author$project$Main$Code('record =\n    { k = { j = { i = { h = { g = { f = { e = { d = { c = { b = { a = "" } } } } } } } } } } }\n'),
-					$author$project$Main$Text('上のコードをコンパイルした際の.elmiファイルを見ると'),
-					$author$project$Main$Code('')
-				]),
-			title: $elm$core$Maybe$Just('原因の深掘り')
-		}),
-		$author$project$Main$TitleOnly(
-		{title: 'まとめ: コンパイル時間を伸ばさないコツ'}),
-		$author$project$Main$Article(
-		{
-			document: _List_fromArray(
-				[
-					$author$project$Main$Text('レコードのネストを増やさない'),
-					$author$project$Main$Text('特にプロジェクトのルートに近い部分で大量のレコードを含むレコードを増やすと大きな影響が出る'),
-					$author$project$Main$Text('末端ならレコードを増やしても影響はほぼない'),
+					$author$project$Main$Text('型推論の結果が大きくなるようなものをなるべく作らない'),
+					$author$project$Main$Text('全ページのMsgをまとめた親Msgとかを持ち回るのは良くない'),
 					$author$project$Main$Divide,
-					$author$project$Main$Text('余談: モジュールを分けてもメモリプレッシャーは改善しない'),
+					$author$project$Main$Text('レコードは特にまずい、のかもしれないそうでもないかもしれない'),
+					$author$project$Main$Text('例えば下のような単純なレコードなら1000重くらいにしても一瞬でコンパイルできる。巨大なHtml等を入れたデータ量が多いだけのレコードも同様'),
+					$author$project$Main$Code('record = { k = { j = { i = { h = { g = { f = { e = { d = { c = { b = { a = "" } } } } } } } } } } } '),
+					$author$project$Main$Divide,
+					$author$project$Main$Text('Extensible recordはまずいのでコンパイル時間を見ながら節度を持って'),
+					$author$project$Main$Text('issueのコードを試したところ21重でクラッシュした'),
+					$author$project$Main$Divide,
+					$author$project$Main$Text('型引数を取るレコードは型推論の結果が大きくなる場合まずいと思われる'),
+					$author$project$Main$Text('本プロジェクトのPageModuleからextensible-record部分のみ消す、outerMsgだけ消すなどした場合も少しずつ改善するが、recordごと消した場合には及ばなかった'),
+					$author$project$Main$Divide,
+					$author$project$Main$Text('余談: モジュールを分けてもフルビルド時のメモリプレッシャーは改善しない'),
 					$author$project$Main$Text('これはコンパイルのフェイズが 全モジュールパース -> 全モジュール型推論 -> 全モジュールコード生成 のように動いているため')
 				]),
-			title: $elm$core$Maybe$Just('まとめ: コンパイル時間を伸ばさないコツ')
+			title: $elm$core$Maybe$Just('まとめ: 現状わかっているコンパイル時間を伸ばさないコツ')
 		})
 	]);
 var $author$project$Main$update = F2(
