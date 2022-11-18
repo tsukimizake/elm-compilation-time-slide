@@ -604,7 +604,7 @@ ${variant}`;
   var VERSION = "1.1.0";
   var TARGET_NAME = "My target name";
   var INITIAL_ELM_COMPILED_TIMESTAMP = Number(
-    "1668617047270"
+    "1668782687693"
   );
   var ORIGINAL_COMPILATION_MODE = "standard";
   var ORIGINAL_BROWSER_UI_POSITION = "BottomLeft";
@@ -9291,27 +9291,32 @@ var $author$project$Main$pages = _List_fromArray(
 		{
 			document: _List_fromArray(
 				[
-					$author$project$Main$Text('elm-compilerをプロファイルモードで再ビルドして、これを使ってプロジェクトをコンパイルすると、コンパイル時間の何割が型チェックに使われているかなどが大まかにわかる'),
+					$author$project$Main$Text('elm-compilerをプロファイルモードで再ビルドしたものを使ってプロジェクトをコンパイルすると、コンパイル時間の何割が型チェックに使われているかなどが大まかにわかる'),
 					$author$project$Main$Text('cf. haskell/cabal#5930 https://nikita-volkov.github.io/profiling-cabal-projects/ http://www.kotha.net/ghcguide_ja/7.6.2/profiling.html'),
 					$author$project$Main$Divide,
-					$author$project$Main$Text('結果は以下'),
-					$author$project$Main$Text('TODO プロファイル結果 データ残ってるといいな')
+					$author$project$Main$Code('\n\ttotal time  =       57.11 secs   (177897 ticks @ 1000 us, 16 processors)\n\ttotal alloc = 14,101,603,032 bytes  (excludes profiling overheads)\n\nCOST CENTRE         MODULE                   SRC                                               %time %alloc\n\ngetUnder256         Data.Utf8                compiler/src/Data/Utf8.hs:(526,1)-(529,36)         13.0    8.0\nsrcFieldTypeToVar   Type.Solve               compiler/src/Type/Solve.hs:(567,1)-(568,42)        12.3    4.7\nget                 Elm.Package              compiler/src/Elm/Package.hs:276:3-53               10.2    9.7\n...\n            '),
+					$author$project$Main$Text('Data.Utf8.getUnder256はいくつか使用箇所があるが、profのcall treeを読むと特に*.elmiを読み出す部分でボトルネックになっていた'),
+					$author$project$Main$Text('*.elmiファイルには型推論の結果として各シンボルにつく型情報が書かれている'),
+					$author$project$Main$Text('2つ目のType.Solve.srcFieldTypeToVarも合わせて、どうやら型推論が変らしい？と推測できる'),
+					$author$project$Main$Text('3つ目のElm.Package.getは使用箇所を見るとコード生成時の呼び出しらしく、無関係と思われる')
 				]),
 			title: $elm$core$Maybe$Just('プロファイル')
 		}),
 		$author$project$Main$TitleOnly(
-		{title: '原因: https://github.com/elm/compiler/issues/1897 (に近いことが起きていた)'}),
+		{title: '原因: https://github.com/elm/compiler/issues/1897 (と他の問題の複合？)'}),
 		$author$project$Main$Article(
 		{
 			document: _List_fromArray(
 				[
 					$author$project$Main$Text('elm-js会(Elmコンパイラが生成するJSの悪口を言う会)で調査したところ、各ページを格納したレコードの型推論後の型が巨大になってしまっていたことが原因だった'),
-					$author$project$Main$Text('extensible-recordは特にバグがあるらしく型が太ってしまう。中身の型と新しいextensible-recordの型が別に作られている？と思われる(ちゃんと調べ切れておらず理由は曖昧)'),
+					$author$project$Main$Text('extensible-recordは特にバグがあるらしく型が太ってしまう(これがissues/1897)(理由はちゃんと調べ切れておらず曖昧)'),
 					$author$project$Main$Divide,
-					$author$project$Main$Text('本プロジェクトでは他の要因も合わさって巨大に'),
-					$author$project$Main$Text('ページごとのinit, update, viewなどをレコードにまとめていたのをやめることで改善')
+					$author$project$Main$Text('本プロジェクトでは単純にプロジェクトが大きいことも合わさって巨大に'),
+					$author$project$Main$Text('ページごとのinit, update, viewなどをレコードにまとめていたのをやめることで改善'),
+					$author$project$Main$Code('\ntype alias PageModule urlParams model msg outerMsg =\n    { init : Shared -> urlParams -> ( HasShared model, Cmd msg )\n    , update : msg -> HasShared model -> ( HasShared model, Cmd msg )\n    , subscriptions : HasShared model -> Sub msg\n    , subscribeToSharedUpdate : HasShared model -> ( HasShared model, Cmd msg )\n    , view : (msg -> outerMsg) -> HasShared model -> Browser.Styled.Document outerMsg\n    }\n\n\ntype alias HasShared model =\n    { model | shared : Shared }\n'),
+					$author$project$Main$Text('上記のPageModule型のレコードを各ページからexportしていた')
 				]),
-			title: $elm$core$Maybe$Just('原因: https://github.com/elm/compiler/issues/1897 (に近いことが起きていた)')
+			title: $elm$core$Maybe$Just('原因: https://github.com/elm/compiler/issues/1897 (と他の問題の複合？)')
 		}),
 		$author$project$Main$Article(
 		{
@@ -9335,11 +9340,15 @@ var $author$project$Main$pages = _List_fromArray(
 		{
 			document: _List_fromArray(
 				[
-					$author$project$Main$Text('前記の修正でメモリ消費、コンパイル時間共に半分程度になった'),
+					$author$project$Main$Text('PageModuleレコードを消す修正でメモリ消費、コンパイル時間共に半分程度になった'),
 					$author$project$Main$Text('加えて、コンパイル中のGC間隔等の設定を(別の人が)やってコンパイル時間はさらに縮んだ'),
-					$author$project$Main$Text('最終的に、問題のファイルのみのコンパイルは30s -> 11s程度に縮んだ'),
-					$author$project$Main$Code('\n  INIT    time    0.007s  (  0.018s elapsed)\n  MUT     time    5.426s  (  2.658s elapsed)\n  GC      time    5.405s  (  7.322s elapsed)\n  EXIT    time    0.001s  (  0.001s elapsed)\n  Total   time   10.839s  (  9.999s elapsed)\n            '),
-					$author$project$Main$Text('また、フルビルドは60s -> 30s程度に')
+					$author$project$Main$Text('最終的に、問題のファイルのみのコンパイルは30s -> 4s程度に縮んだ'),
+					$author$project$Main$Code('\n  INIT    time    0.119s  (  0.271s elapsed)\n  MUT     time    3.511s  (  3.573s elapsed)\n  GC      time    0.004s  (  0.010s elapsed)\n  EXIT    time    0.001s  (  0.002s elapsed)\n  Total   time    3.635s  (  3.856s elapsed)\n            '),
+					$author$project$Main$Text('また、フルビルドは60s -> 30s程度に'),
+					$author$project$Main$Text('改善後のプロファイルは以下'),
+					$author$project$Main$Code('\n\ttotal time  =       19.89 secs   (61965 ticks @ 1000 us, 16 processors)\n\ttotal alloc = 6,537,550,712 bytes  (excludes profiling overheads)\n\nCOST CENTRE         MODULE                   SRC                                               %time %alloc\n\ngetUnder256         Data.Utf8                compiler/src/Data/Utf8.hs:(526,1)-(529,36)         21.9   11.2\nget                 Elm.Package              compiler/src/Elm/Package.hs:276:3-53               15.6   12.4\nget                 AST.Canonical            compiler/src/AST/Canonical.hs:400:3-32             11.0   10.9\n            '),
+					$author$project$Main$Text('*.elmiを読み出す部分は相変わらずボトルネックで、全体のうちに占める割合としては増えたが時間としては減っている'),
+					$author$project$Main$Text('Type.Solve.srcFieldTypeToVarがきれいに消えた')
 				]),
 			title: $elm$core$Maybe$Just('結果: 修正後のコンパイル時間')
 		}),
@@ -9356,14 +9365,13 @@ var $author$project$Main$pages = _List_fromArray(
 					$author$project$Main$Text('例えば下のような単純なレコードなら1000重くらいにしても一瞬でコンパイルできる。巨大なHtml等を入れたデータ量が多いだけのレコードも同様'),
 					$author$project$Main$Code('record = { k = { j = { i = { h = { g = { f = { e = { d = { c = { b = { a = "" } } } } } } } } } } } '),
 					$author$project$Main$Divide,
-					$author$project$Main$Text('Extensible recordはまずいのでコンパイル時間を見ながら節度を持って'),
+					$author$project$Main$Text('Extensible recordは多用するとまずいのでコンパイル時間を見ながら節度を持って'),
 					$author$project$Main$Text('issueのコードを試したところ21重でクラッシュした'),
 					$author$project$Main$Divide,
 					$author$project$Main$Text('型引数を取るレコードは型推論の結果が大きくなる場合まずいと思われる'),
 					$author$project$Main$Text('本プロジェクトのPageModuleからextensible-record部分のみ消す、outerMsgだけ消すなどした場合も少しずつ改善するが、recordごと消した場合には及ばなかった'),
 					$author$project$Main$Divide,
-					$author$project$Main$Text('余談: モジュールを分けてもフルビルド時のメモリプレッシャーは改善しない'),
-					$author$project$Main$Text('これはコンパイルのフェイズが 全モジュールパース -> 全モジュール型推論 -> 全モジュールコード生成 のように動いているため')
+					$author$project$Main$Text('最後に免責事項: 正直中で何が起きてるのかよくわからないので理由に関しては色々嘘を書いているかもしれない')
 				]),
 			title: $elm$core$Maybe$Just('まとめ: 現状わかっているコンパイル時間を伸ばさないコツ')
 		})

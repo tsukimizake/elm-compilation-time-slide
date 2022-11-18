@@ -191,7 +191,7 @@ pages =
   GC      time   27.812s  ( 29.767s elapsed)
   EXIT    time    0.000s  (  0.002s elapsed)
   Total   time   30.834s  ( 32.147s elapsed)
-    """ -- TODO codeに等幅フォント
+    """
             , Text "50000行のフルビルドだと60秒程度"
             , Text "1500行で30秒かかるのはかなり遅い"
             , Text "遅いだけならまだしも、メモリ不足でCIが頻繁に落ちるようになったため調査に乗り出すことに"
@@ -203,30 +203,57 @@ pages =
     , Article
         { title = Just "プロファイル"
         , document =
-            [ Text "elm-compilerをプロファイルモードで再ビルドして、これを使ってプロジェクトをコンパイルすると、コンパイル時間の何割が型チェックに使われているかなどが大まかにわかる"
+            [ Text "elm-compilerをプロファイルモードで再ビルドしたものを使ってプロジェクトをコンパイルすると、コンパイル時間の何割が型チェックに使われているかなどが大まかにわかる"
             , Text "cf. haskell/cabal#5930 https://nikita-volkov.github.io/profiling-cabal-projects/ http://www.kotha.net/ghcguide_ja/7.6.2/profiling.html"
             , Divide
-            , Text "結果は以下"
-            , Text "TODO プロファイル結果 データ残ってるといいな"
+            , Code """
+\ttotal time  =       57.11 secs   (177897 ticks @ 1000 us, 16 processors)
+\ttotal alloc = 14,101,603,032 bytes  (excludes profiling overheads)
+
+COST CENTRE         MODULE                   SRC                                               %time %alloc
+
+getUnder256         Data.Utf8                compiler/src/Data/Utf8.hs:(526,1)-(529,36)         13.0    8.0
+srcFieldTypeToVar   Type.Solve               compiler/src/Type/Solve.hs:(567,1)-(568,42)        12.3    4.7
+get                 Elm.Package              compiler/src/Elm/Package.hs:276:3-53               10.2    9.7
+...
+            """
+            , Text "Data.Utf8.getUnder256はいくつか使用箇所があるが、profのcall treeを読むと特に*.elmiを読み出す部分でボトルネックになっていた"
+            , Text "*.elmiファイルには型推論の結果として各シンボルにつく型情報が書かれている"
+            , Text "2つ目のType.Solve.srcFieldTypeToVarも合わせて、どうやら型推論が変らしい？と推測できる"
+            , Text "3つ目のElm.Package.getは使用箇所を見るとコード生成時の呼び出しらしく、無関係と思われる"
             ]
         }
 
     -- 原因
-    , TitleOnly { title = "原因: https://github.com/elm/compiler/issues/1897 (に近いことが起きていた)" }
+    , TitleOnly { title = "原因: https://github.com/elm/compiler/issues/1897 (と他の問題の複合？)" }
     , Article
-        { title = Just "原因: https://github.com/elm/compiler/issues/1897 (に近いことが起きていた)"
+        { title = Just "原因: https://github.com/elm/compiler/issues/1897 (と他の問題の複合？)"
         , document =
             [ Text "elm-js会(Elmコンパイラが生成するJSの悪口を言う会)で調査したところ、各ページを格納したレコードの型推論後の型が巨大になってしまっていたことが原因だった"
-            , Text "extensible-recordは特にバグがあるらしく型が太ってしまう。中身の型と新しいextensible-recordの型が別に作られている？と思われる(ちゃんと調べ切れておらず理由は曖昧)"
+            , Text "extensible-recordは特にバグがあるらしく型が太ってしまう(これがissues/1897)(理由はちゃんと調べ切れておらず曖昧)"
             , Divide
-            , Text "本プロジェクトでは他の要因も合わさって巨大に"
+            , Text "本プロジェクトでは単純にプロジェクトが大きいことも合わさって巨大に"
             , Text "ページごとのinit, update, viewなどをレコードにまとめていたのをやめることで改善"
+            , Code """
+type alias PageModule urlParams model msg outerMsg =
+    { init : Shared -> urlParams -> ( HasShared model, Cmd msg )
+    , update : msg -> HasShared model -> ( HasShared model, Cmd msg )
+    , subscriptions : HasShared model -> Sub msg
+    , subscribeToSharedUpdate : HasShared model -> ( HasShared model, Cmd msg )
+    , view : (msg -> outerMsg) -> HasShared model -> Browser.Styled.Document outerMsg
+    }
+
+
+type alias HasShared model =
+    { model | shared : Shared }
+"""
+            , Text "上記のPageModule型のレコードを各ページからexportしていた"
             ]
         }
 
     -- 修正前後のコード
     , Article
-        { title = Just "修正箇所(修正前)" -- TODO PageModule型は重要なので書く
+        { title = Just "修正箇所(修正前)"
         , document =
             [ Code """module Page1 exposing(page)
 
@@ -287,17 +314,30 @@ view = ...
     , Article
         { title = Just "結果: 修正後のコンパイル時間"
         , document =
-            [ Text "前記の修正でメモリ消費、コンパイル時間共に半分程度になった"
+            [ Text "PageModuleレコードを消す修正でメモリ消費、コンパイル時間共に半分程度になった"
             , Text "加えて、コンパイル中のGC間隔等の設定を(別の人が)やってコンパイル時間はさらに縮んだ"
-            , Text "最終的に、問題のファイルのみのコンパイルは30s -> 11s程度に縮んだ"
+            , Text "最終的に、問題のファイルのみのコンパイルは30s -> 4s程度に縮んだ"
             , Code """
-  INIT    time    0.007s  (  0.018s elapsed)
-  MUT     time    5.426s  (  2.658s elapsed)
-  GC      time    5.405s  (  7.322s elapsed)
-  EXIT    time    0.001s  (  0.001s elapsed)
-  Total   time   10.839s  (  9.999s elapsed)
+  INIT    time    0.119s  (  0.271s elapsed)
+  MUT     time    3.511s  (  3.573s elapsed)
+  GC      time    0.004s  (  0.010s elapsed)
+  EXIT    time    0.001s  (  0.002s elapsed)
+  Total   time    3.635s  (  3.856s elapsed)
             """
             , Text "また、フルビルドは60s -> 30s程度に"
+            , Text "改善後のプロファイルは以下"
+            , Code """
+\ttotal time  =       19.89 secs   (61965 ticks @ 1000 us, 16 processors)
+\ttotal alloc = 6,537,550,712 bytes  (excludes profiling overheads)
+
+COST CENTRE         MODULE                   SRC                                               %time %alloc
+
+getUnder256         Data.Utf8                compiler/src/Data/Utf8.hs:(526,1)-(529,36)         21.9   11.2
+get                 Elm.Package              compiler/src/Elm/Package.hs:276:3-53               15.6   12.4
+get                 AST.Canonical            compiler/src/AST/Canonical.hs:400:3-32             11.0   10.9
+            """
+            , Text "*.elmiを読み出す部分は相変わらずボトルネックで、全体のうちに占める割合としては増えたが時間としては減っている"
+            , Text "Type.Solve.srcFieldTypeToVarがきれいに消えた"
             ]
         }
 
@@ -313,14 +353,13 @@ view = ...
             , Text "例えば下のような単純なレコードなら1000重くらいにしても一瞬でコンパイルできる。巨大なHtml等を入れたデータ量が多いだけのレコードも同様"
             , Code """record = { k = { j = { i = { h = { g = { f = { e = { d = { c = { b = { a = "" } } } } } } } } } } } """
             , Divide
-            , Text "Extensible recordはまずいのでコンパイル時間を見ながら節度を持って"
+            , Text "Extensible recordは多用するとまずいのでコンパイル時間を見ながら節度を持って"
             , Text "issueのコードを試したところ21重でクラッシュした"
             , Divide
             , Text "型引数を取るレコードは型推論の結果が大きくなる場合まずいと思われる"
             , Text "本プロジェクトのPageModuleからextensible-record部分のみ消す、outerMsgだけ消すなどした場合も少しずつ改善するが、recordごと消した場合には及ばなかった"
             , Divide
-            , Text "余談: モジュールを分けてもフルビルド時のメモリプレッシャーは改善しない"
-            , Text "これはコンパイルのフェイズが 全モジュールパース -> 全モジュール型推論 -> 全モジュールコード生成 のように動いているため"
+            , Text "最後に免責事項: 正直中で何が起きてるのかよくわからないので理由に関しては色々嘘を書いているかもしれない"
             ]
         }
     ]
