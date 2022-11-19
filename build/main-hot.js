@@ -604,7 +604,7 @@ ${variant}`;
   var VERSION = "1.1.0";
   var TARGET_NAME = "My target name";
   var INITIAL_ELM_COMPILED_TIMESTAMP = Number(
-    "1668782687693"
+    "1668836345902"
   );
   var ORIGINAL_COMPILATION_MODE = "standard";
   var ORIGINAL_BROWSER_UI_POSITION = "BottomLeft";
@@ -9252,13 +9252,16 @@ var $author$project$Main$Pic = F2(
 var $author$project$Main$Text = function (a) {
 	return {$: 'Text', a: a};
 };
+var $author$project$Main$TheTitle = function (a) {
+	return {$: 'TheTitle', a: a};
+};
 var $author$project$Main$TitleOnly = function (a) {
 	return {$: 'TitleOnly', a: a};
 };
 var $author$project$Main$pages = _List_fromArray(
 	[
-		$author$project$Main$TitleOnly(
-		{title: '大規模なelmプロジェクトのコンパイル時間の話'}),
+		$author$project$Main$TheTitle(
+		{author: 'tsukimizake774', title: '大規模なelmプロジェクトのコンパイル時間の話'}),
 		$author$project$Main$TitleOnly(
 		{title: '前提: elmのコンパイル速いですよね'}),
 		$author$project$Main$Article(
@@ -11058,6 +11061,7 @@ var $rtfeldman$elm_css$Html$Styled$Attributes$css = $rtfeldman$elm_css$Html$Styl
 var $rtfeldman$elm_css$Css$display = $rtfeldman$elm_css$Css$prop1('display');
 var $rtfeldman$elm_css$Html$Styled$h1 = $rtfeldman$elm_css$Html$Styled$node('h1');
 var $rtfeldman$elm_css$Html$Styled$h2 = $rtfeldman$elm_css$Html$Styled$node('h2');
+var $rtfeldman$elm_css$Html$Styled$h3 = $rtfeldman$elm_css$Html$Styled$node('h3');
 var $rtfeldman$elm_css$Css$height = $rtfeldman$elm_css$Css$prop1('height');
 var $rtfeldman$elm_css$Css$Structure$Compatible = {$: 'Compatible'};
 var $rtfeldman$elm_css$Css$withPrecedingHash = function (str) {
@@ -11677,60 +11681,109 @@ var $author$project$Main$renderPage = function (page) {
 				_List_fromArray(
 					[
 						function () {
-						if (page.$ === 'TitleOnly') {
-							var title = page.a.title;
-							return A2(
-								$rtfeldman$elm_css$Html$Styled$h1,
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$Attributes$css(
-										_List_fromArray(
-											[
-												$rtfeldman$elm_css$Css$textAlign($rtfeldman$elm_css$Css$center),
-												$rtfeldman$elm_css$Css$width(
-												$rtfeldman$elm_css$Css$pct(100)),
-												$rtfeldman$elm_css$Css$lineHeight(
-												$rtfeldman$elm_css$Css$px(560)),
-												$rtfeldman$elm_css$Css$display($rtfeldman$elm_css$Css$inlineBlock)
-											]))
-									]),
-								_List_fromArray(
-									[
-										$rtfeldman$elm_css$Html$Styled$text(title)
-									]));
-						} else {
-							var title = page.a.title;
-							var document = page.a.document;
-							return A2(
-								$rtfeldman$elm_css$Html$Styled$div,
-								_List_Nil,
-								A2(
-									$elm$core$List$cons,
+						switch (page.$) {
+							case 'TheTitle':
+								var title = page.a.title;
+								var author = page.a.author;
+								return A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$css(
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Css$lineHeight(
+													$rtfeldman$elm_css$Css$px(200))
+												]))
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$rtfeldman$elm_css$Html$Styled$h1,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$css(
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Css$textAlign($rtfeldman$elm_css$Css$center),
+															$rtfeldman$elm_css$Css$width(
+															$rtfeldman$elm_css$Css$pct(100)),
+															$rtfeldman$elm_css$Css$display($rtfeldman$elm_css$Css$inlineBlock)
+														]))
+												]),
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text(title)
+												])),
+											A2(
+											$rtfeldman$elm_css$Html$Styled$h3,
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$Attributes$css(
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Css$textAlign($rtfeldman$elm_css$Css$center)
+														]))
+												]),
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Html$Styled$text(author)
+												]))
+										]));
+							case 'TitleOnly':
+								var title = page.a.title;
+								return A2(
+									$rtfeldman$elm_css$Html$Styled$h1,
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$Attributes$css(
+											_List_fromArray(
+												[
+													$rtfeldman$elm_css$Css$textAlign($rtfeldman$elm_css$Css$center),
+													$rtfeldman$elm_css$Css$width(
+													$rtfeldman$elm_css$Css$pct(100)),
+													$rtfeldman$elm_css$Css$lineHeight(
+													$rtfeldman$elm_css$Css$px(560)),
+													$rtfeldman$elm_css$Css$display($rtfeldman$elm_css$Css$inlineBlock)
+												]))
+										]),
+									_List_fromArray(
+										[
+											$rtfeldman$elm_css$Html$Styled$text(title)
+										]));
+							default:
+								var title = page.a.title;
+								var document = page.a.document;
+								return A2(
+									$rtfeldman$elm_css$Html$Styled$div,
+									_List_Nil,
 									A2(
-										$elm$core$Maybe$withDefault,
-										$rtfeldman$elm_css$Html$Styled$text(''),
+										$elm$core$List$cons,
 										A2(
-											$elm$core$Maybe$map,
-											function (t) {
-												return A2(
-													$rtfeldman$elm_css$Html$Styled$h2,
-													_List_fromArray(
-														[
-															$rtfeldman$elm_css$Html$Styled$Attributes$css(
-															_List_fromArray(
-																[
-																	$rtfeldman$elm_css$Css$textAlign($rtfeldman$elm_css$Css$center),
-																	$rtfeldman$elm_css$Css$marginTop(
-																	$rtfeldman$elm_css$Css$px(0))
-																]))
-														]),
-													_List_fromArray(
-														[
-															$rtfeldman$elm_css$Html$Styled$text(t)
-														]));
-											},
-											title)),
-									A2($elm$core$List$map, $author$project$Main$renderDocument, document)));
+											$elm$core$Maybe$withDefault,
+											$rtfeldman$elm_css$Html$Styled$text(''),
+											A2(
+												$elm$core$Maybe$map,
+												function (t) {
+													return A2(
+														$rtfeldman$elm_css$Html$Styled$h2,
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$Attributes$css(
+																_List_fromArray(
+																	[
+																		$rtfeldman$elm_css$Css$textAlign($rtfeldman$elm_css$Css$center),
+																		$rtfeldman$elm_css$Css$marginTop(
+																		$rtfeldman$elm_css$Css$px(0))
+																	]))
+															]),
+														_List_fromArray(
+															[
+																$rtfeldman$elm_css$Html$Styled$text(t)
+															]));
+												},
+												title)),
+										A2($elm$core$List$map, $author$project$Main$renderDocument, document)));
 						}
 					}()
 					])),

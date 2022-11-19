@@ -186,11 +186,11 @@ pages =
         , document =
             [ Text "弊社のSPAアプリ(50000行程度)のうち、各ページの結線を担当している1ファイル(1500行程度)だけtouchしたものの7月時点のコンパイル時間"
             , Code """
-  INIT    time    0.003s  (  0.008s elapsed)
-  MUT     time    3.018s  (  2.370s elapsed)
-  GC      time   27.812s  ( 29.767s elapsed)
-  EXIT    time    0.000s  (  0.002s elapsed)
-  Total   time   30.834s  ( 32.147s elapsed)
+  INIT    time    0.007s  (  0.017s elapsed)
+  MUT     time    7.841s  (  4.005s elapsed)
+  GC      time   19.404s  ( 23.977s elapsed)
+  EXIT    time    0.001s  (  0.003s elapsed)
+  Total   time   27.253s  ( 28.002s elapsed)
     """
             , Text "50000行のフルビルドだと60秒程度"
             , Text "1500行で30秒かかるのはかなり遅い"
