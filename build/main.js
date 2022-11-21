@@ -6150,16 +6150,13 @@ var $author$project$Main$Pic = F2(
 var $author$project$Main$Text = function (a) {
 	return {$: 'Text', a: a};
 };
-var $author$project$Main$TheTitle = function (a) {
-	return {$: 'TheTitle', a: a};
-};
 var $author$project$Main$TitleOnly = function (a) {
 	return {$: 'TitleOnly', a: a};
 };
 var $author$project$Main$pages = _List_fromArray(
 	[
-		$author$project$Main$TheTitle(
-		{author: 'tsukimizake774', title: '大規模なelmプロジェクトのコンパイル時間の話'}),
+		$author$project$Main$TitleOnly(
+		{title: '大規模なelmプロジェクトのコンパイル時間の話'}),
 		$author$project$Main$TitleOnly(
 		{title: '前提: elmのコンパイル速いですよね'}),
 		$author$project$Main$Article(
@@ -6193,7 +6190,7 @@ var $author$project$Main$pages = _List_fromArray(
 			document: _List_fromArray(
 				[
 					$author$project$Main$Text('elm-compilerをプロファイルモードで再ビルドしたものを使ってプロジェクトをコンパイルすると、コンパイル時間の何割が型チェックに使われているかなどが大まかにわかる'),
-					$author$project$Main$Text('cf. haskell/cabal#5930 https://nikita-volkov.github.io/profiling-cabal-projects/ http://www.kotha.net/ghcguide_ja/7.6.2/profiling.html'),
+					$author$project$Main$Text('cf. https://github.com/haskell/cabal/issues/5930 https://nikita-volkov.github.io/profiling-cabal-projects/ http://www.kotha.net/ghcguide_ja/7.6.2/profiling.html'),
 					$author$project$Main$Divide,
 					$author$project$Main$Code('\n\ttotal time  =       57.11 secs   (177897 ticks @ 1000 us, 16 processors)\n\ttotal alloc = 14,101,603,032 bytes  (excludes profiling overheads)\n\nCOST CENTRE         MODULE                   SRC                                               %time %alloc\n\ngetUnder256         Data.Utf8                compiler/src/Data/Utf8.hs:(526,1)-(529,36)         13.0    8.0\nsrcFieldTypeToVar   Type.Solve               compiler/src/Type/Solve.hs:(567,1)-(568,42)        12.3    4.7\nget                 Elm.Package              compiler/src/Elm/Package.hs:276:3-53               10.2    9.7\n...\n            '),
 					$author$project$Main$Text('Data.Utf8.getUnder256はいくつか使用箇所があるが、profのcall treeを読むと特に*.elmiを読み出す部分でボトルネックになっていた'),
@@ -7959,7 +7956,6 @@ var $rtfeldman$elm_css$Html$Styled$Attributes$css = $rtfeldman$elm_css$Html$Styl
 var $rtfeldman$elm_css$Css$display = $rtfeldman$elm_css$Css$prop1('display');
 var $rtfeldman$elm_css$Html$Styled$h1 = $rtfeldman$elm_css$Html$Styled$node('h1');
 var $rtfeldman$elm_css$Html$Styled$h2 = $rtfeldman$elm_css$Html$Styled$node('h2');
-var $rtfeldman$elm_css$Html$Styled$h3 = $rtfeldman$elm_css$Html$Styled$node('h3');
 var $rtfeldman$elm_css$Css$height = $rtfeldman$elm_css$Css$prop1('height');
 var $rtfeldman$elm_css$Css$Structure$Compatible = {$: 'Compatible'};
 var $rtfeldman$elm_css$Css$withPrecedingHash = function (str) {
@@ -8579,109 +8575,60 @@ var $author$project$Main$renderPage = function (page) {
 				_List_fromArray(
 					[
 						function () {
-						switch (page.$) {
-							case 'TheTitle':
-								var title = page.a.title;
-								var author = page.a.author;
-								return A2(
-									$rtfeldman$elm_css$Html$Styled$div,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$css(
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Css$lineHeight(
-													$rtfeldman$elm_css$Css$px(200))
-												]))
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$rtfeldman$elm_css$Html$Styled$h1,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$css(
-													_List_fromArray(
-														[
-															$rtfeldman$elm_css$Css$textAlign($rtfeldman$elm_css$Css$center),
-															$rtfeldman$elm_css$Css$width(
-															$rtfeldman$elm_css$Css$pct(100)),
-															$rtfeldman$elm_css$Css$display($rtfeldman$elm_css$Css$inlineBlock)
-														]))
-												]),
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$text(title)
-												])),
-											A2(
-											$rtfeldman$elm_css$Html$Styled$h3,
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$Attributes$css(
-													_List_fromArray(
-														[
-															$rtfeldman$elm_css$Css$textAlign($rtfeldman$elm_css$Css$center)
-														]))
-												]),
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Html$Styled$text(author)
-												]))
-										]));
-							case 'TitleOnly':
-								var title = page.a.title;
-								return A2(
-									$rtfeldman$elm_css$Html$Styled$h1,
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$Attributes$css(
-											_List_fromArray(
-												[
-													$rtfeldman$elm_css$Css$textAlign($rtfeldman$elm_css$Css$center),
-													$rtfeldman$elm_css$Css$width(
-													$rtfeldman$elm_css$Css$pct(100)),
-													$rtfeldman$elm_css$Css$lineHeight(
-													$rtfeldman$elm_css$Css$px(560)),
-													$rtfeldman$elm_css$Css$display($rtfeldman$elm_css$Css$inlineBlock)
-												]))
-										]),
-									_List_fromArray(
-										[
-											$rtfeldman$elm_css$Html$Styled$text(title)
-										]));
-							default:
-								var title = page.a.title;
-								var document = page.a.document;
-								return A2(
-									$rtfeldman$elm_css$Html$Styled$div,
-									_List_Nil,
+						if (page.$ === 'TitleOnly') {
+							var title = page.a.title;
+							return A2(
+								$rtfeldman$elm_css$Html$Styled$h1,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$Attributes$css(
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Css$textAlign($rtfeldman$elm_css$Css$center),
+												$rtfeldman$elm_css$Css$width(
+												$rtfeldman$elm_css$Css$pct(100)),
+												$rtfeldman$elm_css$Css$lineHeight(
+												$rtfeldman$elm_css$Css$px(560)),
+												$rtfeldman$elm_css$Css$display($rtfeldman$elm_css$Css$inlineBlock)
+											]))
+									]),
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(title)
+									]));
+						} else {
+							var title = page.a.title;
+							var document = page.a.document;
+							return A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								A2(
+									$elm$core$List$cons,
 									A2(
-										$elm$core$List$cons,
+										$elm$core$Maybe$withDefault,
+										$rtfeldman$elm_css$Html$Styled$text(''),
 										A2(
-											$elm$core$Maybe$withDefault,
-											$rtfeldman$elm_css$Html$Styled$text(''),
-											A2(
-												$elm$core$Maybe$map,
-												function (t) {
-													return A2(
-														$rtfeldman$elm_css$Html$Styled$h2,
-														_List_fromArray(
-															[
-																$rtfeldman$elm_css$Html$Styled$Attributes$css(
-																_List_fromArray(
-																	[
-																		$rtfeldman$elm_css$Css$textAlign($rtfeldman$elm_css$Css$center),
-																		$rtfeldman$elm_css$Css$marginTop(
-																		$rtfeldman$elm_css$Css$px(0))
-																	]))
-															]),
-														_List_fromArray(
-															[
-																$rtfeldman$elm_css$Html$Styled$text(t)
-															]));
-												},
-												title)),
-										A2($elm$core$List$map, $author$project$Main$renderDocument, document)));
+											$elm$core$Maybe$map,
+											function (t) {
+												return A2(
+													$rtfeldman$elm_css$Html$Styled$h2,
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$Attributes$css(
+															_List_fromArray(
+																[
+																	$rtfeldman$elm_css$Css$textAlign($rtfeldman$elm_css$Css$center),
+																	$rtfeldman$elm_css$Css$marginTop(
+																	$rtfeldman$elm_css$Css$px(0))
+																]))
+														]),
+													_List_fromArray(
+														[
+															$rtfeldman$elm_css$Html$Styled$text(t)
+														]));
+											},
+											title)),
+									A2($elm$core$List$map, $author$project$Main$renderDocument, document)));
 						}
 					}()
 					])),

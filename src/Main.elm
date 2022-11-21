@@ -204,7 +204,7 @@ pages =
         { title = Just "プロファイル"
         , document =
             [ Text "elm-compilerをプロファイルモードで再ビルドしたものを使ってプロジェクトをコンパイルすると、コンパイル時間の何割が型チェックに使われているかなどが大まかにわかる"
-            , Text "cf. haskell/cabal#5930 https://nikita-volkov.github.io/profiling-cabal-projects/ http://www.kotha.net/ghcguide_ja/7.6.2/profiling.html"
+            , Text "cf. https://github.com/haskell/cabal/issues/5930 https://nikita-volkov.github.io/profiling-cabal-projects/ http://www.kotha.net/ghcguide_ja/7.6.2/profiling.html"
             , Divide
             , Code """
 \ttotal time  =       57.11 secs   (177897 ticks @ 1000 us, 16 processors)
